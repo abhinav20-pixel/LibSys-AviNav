@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Student Navigation -->
+<nav
+    class="glass sticky top-0 z-50 px-8 py-4 bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+    <a href="{{ url_for('student_dashboard') }}"
+        class="flex items-center space-x-2 text-gray-800 dark:text-white hover:opacity-80 transition-opacity">
+        <div
+            class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-xl flex items-center justify-center text-white shadow">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div>
+            <span class="text-xl font-bold leading-none block">Student Hub</span>
+            <span class="text-xs text-gray-500 font-mono">{{ user.library_id }}</span>
+        </div>
+    </a>
+    <div class="flex space-x-6 items-center">
+        <a href="{{ url_for('browse') }}"
+            class="font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">Library
+            Catalog</a>
+
+        <div class="h-6 w-px bg-gray-300 dark:bg-gray-700"></div>
+
+        <button onclick="toggleTheme()"
+            class="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-white transition-colors">
+            <i class="fa-solid fa-moon dark:hidden"></i>
+            <i class="fa-solid fa-sun hidden dark:block"></i>
+        </button>
+
+        <a href="{{ url_for('auth.logout') }}"
+            class="text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 transition-colors"
+            title="Logout">
+            <i class="fa-solid fa-right-from-bracket text-lg"></i>
+        </a>
+    </div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-6 py-10">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div
+        class="mb-8 p-4 rounded-xl text-sm font-medium {% if category == 'error' %}bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-900/30 dark:border-rose-800 dark:text-rose-400{% else %}bg-green-50 text-green-600 border border-green-200 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400{% endif %}">
+        <i class="fa-solid fa-circle-info mr-2"></i> {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Left Column: Profile & Issued Books -->
+        <div class="lg:col-span-2 space-y-8">
+
+            <!-- Welcome Card -->
+            <div
+                class="glass p-8 rounded-3xl relative overflow-hidden bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                    <i class="fa-solid fa-book-open-reader text-9xl"></i>
+                </div>
+                <div class="relative z-10">
+                    <h1 class="text-3xl font-black text-gray-900 dark:text-white mb-2">Welcome, {{ user.name.split('
+                        ')[0] }}! <span class="wave text-2xl">👋</span></h1>
+                    <p class="text-gray-600 dark:text-gray-400 text-lg">Here's your reading progress and library status.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Issued Books -->
+            <div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-indigo-500"></i> Currently Reading
+                </h3>
+
+                <div class="space-y-4">
+                    {% for book in issued_books %}
+                    <div
+                        class="glass p-5 rounded-2xl flex flex-col md:flex-row gap-5 border border-indigo-50 dark:border-indigo-900/30 bg-white/50 dark:bg-gray-800/50">
+                        <div
+                            class="w-20 h-28 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center shadow-inner shrink-0 text-gray-400">
+                            <i class="fa-solid fa-book text-3xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-gray-900 dark:text-white">{{ book.title }}</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">by {{ book.author }}</p>
+
+                            <div class="flex items-center gap-4 text-sm">
+                                <span
+                                    class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-md">
+                                    <i class="fa-regular fa-calendar mr-1"></i> Issued: {{ book.issue_date[:10] }}
+                                </span>
+                            </div>
+                        </div>
+                        <div
+                            class="flex flex-col items-end justify-center pt-4 md:pt-0 md:pl-4 border-t md:border-t-0 md:border-l border-gray-100 dark:border-gray-700 min-w-[200px]">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-bold mb-1">
+                                Return Due</p>
+                            <p class="text-lg font-bold text-gray-900 dark:text-white">{{ book.return_deadline[:10] }}
+                            </p>
+
+                            <!-- Timer Component -->
+                            <div class="mt-2 w-full text-right" data-deadline="{{ book.return_deadline }}">
+                                <span
+                                    class="timer-display inline-block px-3 py-1.5 rounded-lg text-sm font-mono font-semibold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                    Calculating...
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div
+                        class="glass p-8 rounded-2xl text-center text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                        <i class="fa-solid fa-book-journal-whills text-5xl mb-3 opacity-50"></i>
+                        <p>You have no books currently issued.</p>
+                        <a href="{{ url_for('browse') }}"
+                            class="inline-block mt-4 text-indigo-600 hover:text-indigo-800 font-medium dark:text-indigo-400">Browse
+                            Catalog &rarr;</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Reservations -->
+            <div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-regular fa-bookmark text-rose-500"></i> My Reservations
+                </h3>
+
+                <div
+                    class="glass rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 dark:bg-gray-800/80">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold text-gray-600 dark:text-gray-300">Book</th>
+                                <th class="px-6 py-3 font-semibold text-gray-600 dark:text-gray-300">Reserved On</th>
+                                <th class="px-6 py-3 font-semibold text-gray-600 dark:text-gray-300 text-right">Status
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                            {% for res in reservations %}
+                            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <p class="font-bold text-gray-900 dark:text-white">{{ res.title }}</p>
+                                    <p class="text-xs text-gray-500">{{ res.author }}</p>
+                                </td>
+                                <td class="px-6 py-4 text-gray-500">{{ res.reservation_date[:10] }}</td>
+                                <td class="px-6 py-4 text-right">
+                                    {% if res.status == 'pending' %}
+                                    <span
+                                        class="px-2.5 py-1 bg-amber-100 text-amber-700 rounded-md text-xs font-semibold dark:bg-amber-900/30 dark:text-amber-400">PENDING</span>
+                                    {% elif res.status == 'approved' %}
+                                    <span
+                                        class="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-md text-xs font-semibold dark:bg-indigo-900/30 dark:text-indigo-400">APPROVED</span>
+                                    {% elif res.status == 'completed' %}
+                                    <span
+                                        class="px-2.5 py-1 bg-green-100 text-green-700 rounded-md text-xs font-semibold dark:bg-green-900/30 dark:text-green-400">ISSUED</span>
+                                    {% else %}
+                                    <span
+                                        class="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-semibold dark:bg-gray-700 dark:text-gray-400">REJECTED</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="px-6 py-6 text-center text-gray-500">No active reservations.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: ID Card & AI Recommendations -->
+        <div class="lg:col-span-1 space-y-8">
+
+            <!-- Digital ID Card -->
+            <div
+                class="glass p-6 rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 text-white shadow-lg relative overflow-hidden group">
+                <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-5 transition-opacity"></div>
+                <div class="flex items-center justify-between mb-6">
+                    <span class="text-xs uppercase tracking-widest font-bold opacity-80">Library Card</span>
+                    <i class="fa-solid fa-building-columns opacity-50"></i>
+                </div>
+
+                <div class="flex gap-4 items-center mb-6">
+                    <div
+                        class="w-16 h-16 rounded-full border-2 border-white/30 bg-white/10 flex items-center justify-center shadow-inner">
+                        <i class="fa-solid fa-user text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold">{{ user.name }}</h3>
+                        <p class="text-sm opacity-80">{{ user.department }} Dept.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-3 rounded-xl flex items-center justify-between text-gray-900">
+                    <div>
+                        <p class="text-[0.6rem] uppercase text-gray-500 font-bold tracking-wider mb-0.5">Barcode</p>
+                        <p class="font-mono font-bold text-sm">{{ user.barcode }}</p>
+                    </div>
+                    <!-- Minimal Barcode simulation -->
+                    <div class="flex gap-[2px] h-8 opacity-60">
+                        <div class="w-1 bg-black"></div>
+                        <div class="w-0.5 bg-black"></div>
+                        <div class="w-1.5 bg-black"></div>
+                        <div class="w-1 bg-black"></div>
+                        <div class="w-0.5 bg-black"></div>
+                        <div class="w-2 bg-black"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Recommendations (Smart Picks) -->
+            <div
+                class="glass p-6 rounded-3xl bg-white dark:bg-gray-800 border border-teal-100 dark:border-teal-900 shadow-sm relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-teal-50 dark:bg-teal-900/20 rounded-full blur-2xl">
+                </div>
+
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 relative z-10">
+                    <i class="fa-solid fa-wand-magic-sparkles text-teal-500"></i> Smart Picks
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">Curated recommendations based on your
+                    department.</p>
+
+                <div class="space-y-4">
+                    {% for book in recommendations %}
+                    <div class="flex gap-3 items-center group">
+                        <div
+                            class="w-12 h-16 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-book text-gray-400"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-bold text-gray-900 dark:text-white truncate"
+                                title="{{ book.title }}">{{ book.title }}</h4>
+                            <p class="text-xs text-gray-500 truncate">{{ book.author }}</p>
+                            <span
+                                class="inline-block mt-1 text-[10px] bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 px-1.5 py-0.5 rounded font-medium">{{
+                                book.category }}</span>
+                        </div>
+                        <form action="{{ url_for('reserve_book', book_id=book.id) }}" method="POST">
+                            <button type="submit"
+                                class="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-teal-500 hover:text-white dark:hover:bg-teal-600 transition-colors flex items-center justify-center"
+                                title="Reserve Book">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <p class="text-sm text-gray-500">Not enough data to recommend books just yet.</p>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Overdue Countdown Timer Logic
+    function updateTimers() {
+        const timerDisplays = document.querySelectorAll('[data-deadline]');
+        const now = new Date();
+
+        timerDisplays.forEach(displayEl => {
+            const deadlineStr = displayEl.getAttribute('data-deadline');
+            // Assuming format like "2026-03-24 14:00:00" -> Replace space with T for valid ISO parsing across all browsers
+            const deadline = new Date(deadlineStr.replace(' ', 'T'));
+            const diffMs = deadline - now;
+
+            const timerSpan = displayEl.querySelector('.timer-display');
+
+            if (diffMs <= 0) {
+                // Overdue
+                const overdueDays = Math.ceil(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
+                timerSpan.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Overdue by ${overdueDays} Day(s)`;
+                timerSpan.className = 'timer-display inline-block px-3 py-1.5 rounded-lg text-sm font-mono font-semibold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400 animate-pulse';
+            } else {
+                // Time remaining
+                const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+                let text = '';
+                if (days > 0) {
+                    text = `${days}d ${hours}h left`;
+                    if (days <= 3) {
+                        timerSpan.className = 'timer-display inline-block px-3 py-1.5 rounded-lg text-sm font-mono font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400';
+                    } else {
+                        timerSpan.className = 'timer-display inline-block px-3 py-1.5 rounded-lg text-sm font-mono font-semibold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400';
+                    }
+                } else {
+                    const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    text = `${hours}h ${mins}m left`;
+                    timerSpan.className = 'timer-display inline-block px-3 py-1.5 rounded-lg text-sm font-mono font-semibold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400';
+                }
+                timerSpan.innerHTML = `<i class="fa-regular fa-clock mr-1"></i> ${text}`;
+            }
+        });
+    }
+
+    // Initial call
+    updateTimers();
+    // Update every minute (no need for seconds)
+    setInterval(updateTimers, 60000);
+</script>
+{% endblock %}

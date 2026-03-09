@@ -1,0 +1,189 @@
+{% extends "admin/base_admin.html" %}
+
+{% block admin_content %}
+<div class="space-y-6">
+    <!-- Top Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Total Books Card -->
+        <div class="glass hover-lift p-6 rounded-2xl flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Total Books</p>
+                <h3 class="text-3xl font-bold text-gray-800 dark:text-white">{{ stats.total_books }}</h3>
+            </div>
+            <div
+                class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400">
+                <i class="fa-solid fa-book-open text-xl"></i>
+            </div>
+        </div>
+
+        <!-- Total Users Card -->
+        <div class="glass hover-lift p-6 rounded-2xl flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Total Students</p>
+                <h3 class="text-3xl font-bold text-gray-800 dark:text-white">{{ stats.total_users }}</h3>
+            </div>
+            <div
+                class="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 dark:bg-teal-900/50 dark:text-teal-400">
+                <i class="fa-solid fa-users text-xl"></i>
+            </div>
+        </div>
+
+        <!-- Books Issued Card -->
+        <div class="glass hover-lift p-6 rounded-2xl flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Currently Issued</p>
+                <h3 class="text-3xl font-bold text-gray-800 dark:text-white">{{ stats.books_issued }}</h3>
+            </div>
+            <div
+                class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+                <i class="fa-solid fa-handshake text-xl"></i>
+            </div>
+        </div>
+
+        <!-- Overdue Books Card -->
+        <div class="glass hover-lift p-6 rounded-2xl flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Overdue Books</p>
+                <h3 class="text-3xl font-bold text-rose-600 dark:text-rose-400">{{ stats.overdue_books }}</h3>
+            </div>
+            <div
+                class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 dark:bg-rose-900/50 dark:text-rose-400">
+                <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+            </div>
+        </div>
+
+        <!-- Fines Collected Card -->
+        <div class="glass hover-lift p-6 rounded-2xl flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Fines Collected</p>
+                <h3 class="text-3xl font-bold text-gray-800 dark:text-white">₹{{ stats.fine_collected }}</h3>
+            </div>
+            <div
+                class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                <i class="fa-solid fa-indian-rupee-sign text-xl"></i>
+            </div>
+        </div>
+
+        <!-- Online Reservations Card -->
+        <div class="glass hover-lift p-6 rounded-2xl flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Pending Reservations</p>
+                <h3 class="text-3xl font-bold text-gray-800 dark:text-white">{{ stats.online_reservations }}</h3>
+            </div>
+            <div
+                class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 dark:bg-amber-900/50 dark:text-amber-400">
+                <i class="fa-solid fa-bookmark text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <!-- Monthly Issue Chart -->
+        <div class="glass p-6 rounded-2xl">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Books Issued Monthly</h3>
+            <div class="chart-container">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Department Stats Chart -->
+        <div class="glass p-6 rounded-2xl">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Borrowing by Department</h3>
+            <div class="chart-container">
+                <canvas id="deptChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Shared chart styling settings for both light and dark modes
+        const isDark = document.documentElement.classList.contains('dark');
+        const textColor = isDark ? '#e5e7eb' : '#374151';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+
+        // Monthly Chart (Line)
+        const ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
+
+        // Create gradient
+        let gradientLine = ctxMonthly.createLinearGradient(0, 0, 0, 400);
+        gradientLine.addColorStop(0, 'rgba(79, 70, 229, 0.5)'); // Indigo
+        gradientLine.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
+
+        new Chart(ctxMonthly, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                datasets: [{
+                    label: 'Books Issued',
+                    data: [65, 59, 80, 81, 56, 55, 90], // Dummy Data
+                    borderColor: '#4f46e5',
+                    backgroundColor: gradientLine,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#4f46e5',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        grid: { color: gridColor },
+                        ticks: { color: textColor }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: textColor }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Department Chart (Doughnut)
+        const ctxDept = document.getElementById('deptChart').getContext('2d');
+        new Chart(ctxDept, {
+            type: 'doughnut',
+            data: {
+                labels: ['Computer Science', 'Mechanical', 'Civil', 'Electronics'],
+                datasets: [{
+                    data: [35, 20, 15, 30], // Dummy Data
+                    backgroundColor: [
+                        '#4f46e5', // Indigo
+                        '#0d9488', // Teal
+                        '#f59e0b', // Amber
+                        '#f43f5e'  // Rose
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: textColor, padding: 20, font: { family: "'Inter', sans-serif" } }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

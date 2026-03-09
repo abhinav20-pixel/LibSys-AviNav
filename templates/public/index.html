@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Public Navigation -->
+<nav
+    class="glass sticky top-0 z-50 px-8 py-4 bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-800">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <div
+                class="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-purple-500 rounded-xl flex items-center justify-center text-white text-xl shadow-lg">
+                <i class="fa-solid fa-book-open-reader"></i>
+            </div>
+            <span
+                class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-500 dark:from-indigo-400 dark:to-purple-400">LibSys
+                AviNav</span>
+        </div>
+
+        <div class="hidden md:flex space-x-8 items-center">
+            <a href="{{ url_for('index') }}"
+                class="font-medium text-gray-800 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Home</a>
+            <a href="{{ url_for('browse') }}"
+                class="font-medium text-gray-800 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Browse
+                Books</a>
+
+            <div class="h-6 w-px bg-gray-300 dark:bg-gray-700"></div>
+
+            <button onclick="toggleTheme()"
+                class="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-white transition-colors">
+                <i class="fa-solid fa-moon dark:hidden text-lg"></i>
+                <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
+            </button>
+
+            <a href="{{ url_for('auth.login') }}"
+                class="btn-gradient px-6 py-2.5 rounded-full font-semibold text-white shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">
+                Login
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<div class="relative overflow-hidden bg-gray-50 dark:bg-gray-900 pt-16 sm:pt-24 lg:pt-32 pb-16">
+    <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
+        <div
+            class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]">
+        </div>
+    </div>
+
+    <div class="mx-auto max-w-7xl px-6 lg:px-8 text-center pb-16">
+        <h1 class="text-4xl font-black tracking-tight text-gray-900 dark:text-white sm:text-6xl">
+            Welcome to the <br>
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-teal-400">Smart Knowledge
+                Hub</span>
+        </h1>
+        <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            Discover thousands of academic resources, manage your borrowings, and get AI-powered tailored
+            recommendations to boost your academic journey.
+        </p>
+        <div class="mt-10 flex items-center justify-center gap-x-6">
+            <a href="{{ url_for('browse') }}"
+                class="btn-gradient px-8 py-3.5 rounded-full font-bold text-white shadow-lg text-lg flex items-center gap-2">
+                Explore Library <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <a href="{{ url_for('auth.login') }}"
+                class="text-sm font-semibold leading-6 text-gray-900 dark:text-white">Student Dashboard <span
+                    aria-hidden="true">→</span></a>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Books (Latest additions) -->
+<div class="py-16 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Recently Added</h2>
+            <p class="mt-4 text-gray-600 dark:text-gray-400">Check out the newest additions to our collection.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for book in books %}
+            <div
+                class="glass hover-lift p-6 rounded-3xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col h-full group">
+                <div
+                    class="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl mb-6 flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/30 transition-colors">
+                    <i class="fa-solid fa-book text-6xl opacity-50"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight">{{ book.title }}
+                </h3>
+                <p class="text-sm text-indigo-600 dark:text-indigo-400 font-medium mt-2">{{ book.author }}</p>
+
+                <div class="mt-auto pt-6 flex items-center justify-between">
+                    <span
+                        class="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                        {{ book.category }}
+                    </span>
+                    {% if book.available_copies > 0 %}
+                    <span class="text-sm font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><i
+                            class="fa-solid fa-circle-check text-xs"></i> Available</span>
+                    {% else %}
+                    <span class="text-sm font-medium text-rose-600 dark:text-rose-400 flex items-center gap-1"><i
+                            class="fa-solid fa-clock text-xs"></i> Borrowed</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="col-span-full text-center py-12 text-gray-500">
+                <p>No books currently in the library catalog.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-12 text-center">
+            <a href="{{ url_for('browse') }}"
+                class="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+                View All Books <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Features -->
+<div class="py-24 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+            <div class="space-y-4">
+                <div
+                    class="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400 text-2xl shadow-sm">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Smart Identity</h3>
+                <p class="text-gray-600 dark:text-gray-400">Access library services instantly using your digital QR and
+                    Barcode enabled identity card.</p>
+            </div>
+            <div class="space-y-4">
+                <div
+                    class="mx-auto w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl shadow-sm">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">AI Recommendations</h3>
+                <p class="text-gray-600 dark:text-gray-400">Our engine suggests personalized readings based on your
+                    department and academic interests.</p>
+            </div>
+            <div class="space-y-4">
+                <div
+                    class="mx-auto w-16 h-16 bg-teal-100 dark:bg-teal-900/50 rounded-2xl flex items-center justify-center text-teal-600 dark:text-teal-400 text-2xl shadow-sm">
+                    <i class="fa-solid fa-laptop"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Online Portal</h3>
+                <p class="text-gray-600 dark:text-gray-400">Browse the catalog, request online reservations, and track
+                    your dues directly from your device.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

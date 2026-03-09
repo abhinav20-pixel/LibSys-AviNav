@@ -1,0 +1,112 @@
+{% extends "admin/base_admin.html" %}
+
+{% block admin_title %}Manage Reservations{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+
+    <!-- Reservations Table -->
+    <div class="glass rounded-2xl overflow-hidden shadow-sm">
+        <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="font-semibold text-gray-800 dark:text-gray-200">Online Requests</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left whitespace-nowrap text-sm">
+                <thead>
+                    <tr class="bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300">
+                        <th class="px-6 py-4 font-semibold border-b border-gray-200 dark:border-gray-700">Date Logged
+                        </th>
+                        <th class="px-6 py-4 font-semibold border-b border-gray-200 dark:border-gray-700">Student Info
+                        </th>
+                        <th class="px-6 py-4 font-semibold border-b border-gray-200 dark:border-gray-700">Book Item</th>
+                        <th class="px-6 py-4 font-semibold border-b border-gray-200 dark:border-gray-700">Status</th>
+                        <th class="px-6 py-4 font-semibold border-b border-gray-200 dark:border-gray-700 text-right">
+                            Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for res in reservations %}
+                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                        <td class="px-6 py-4 text-gray-500">{{ res.reservation_date[:16] }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="font-medium text-gray-900 dark:text-white">{{ res.user_name }}</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 font-mono">{{ res.library_id
+                                    }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="text-gray-700 dark:text-gray-300 truncate max-w-xs">{{ res.book_title
+                                    }}</span>
+                                <span
+                                    class="text-[0.65rem] {% if res.available_copies > 0 %}text-green-600 dark:text-green-400{% else %}text-rose-600 dark:text-rose-400{% endif %} font-bold uppercase tracking-widest mt-0.5">
+                                    {{ res.available_copies }} in stock
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if res.status == 'pending' %}
+                            <span
+                                class="px-2.5 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 rounded-lg text-xs font-semibold"><i
+                                    class="fa-regular fa-clock mr-1"></i> PENDING</span>
+                            {% elif res.status == 'approved' %}
+                            <span
+                                class="px-2.5 py-1 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 rounded-lg text-xs font-semibold"><i
+                                    class="fa-solid fa-check mr-1"></i> APPROVED</span>
+                            {% elif res.status == 'completed' %}
+                            <span
+                                class="px-2.5 py-1 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 rounded-lg text-xs font-semibold"><i
+                                    class="fa-solid fa-check-double mr-1"></i> COMPLETED</span>
+                            {% else %}
+                            <span
+                                class="px-2.5 py-1 bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded-lg text-xs font-semibold"><i
+                                    class="fa-solid fa-xmark mr-1"></i> REJECTED</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <form action="{{ url_for('reservations.update_reservation', res_id=res.id) }}" method="POST"
+                                class="inline-flex space-x-2">
+                                {% if res.status == 'pending' %}
+                                <button type="submit" name="action" value="approve"
+                                    class="px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg font-medium transition-colors dark:bg-indigo-900/40 dark:text-indigo-300 dark:hover:bg-indigo-900/60 disabled:opacity-50"
+                                    {% if res.available_copies <=0 %}disabled title="No stock available" {% endif %}>
+                                    Approve
+                                </button>
+                                <button type="submit" name="action" value="reject"
+                                    class="px-3 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-lg font-medium transition-colors dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/60"
+                                    onclick="return confirm('Reject this request?');">
+                                    Reject
+                                </button>
+                                {% elif res.status == 'approved' %}
+                                <button type="submit" name="action" value="complete"
+                                    class="px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg font-medium transition-colors dark:bg-green-900/40 dark:text-green-300 dark:hover:bg-green-900/60">
+                                    Mark Issued
+                                </button>
+                                <button type="submit" name="action" value="reject"
+                                    class="px-3 py-1.5 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                    onclick="return confirm('Cancel this approval?');">
+                                    Cancel
+                                </button>
+                                {% else %}
+                                <span class="text-xs text-gray-400 italic">No actions available</span>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                            <div class="flex flex-col items-center justify-center space-y-3">
+                                <i class="fa-solid fa-inbox text-4xl text-gray-300 dark:text-gray-600"></i>
+                                <p class="text-lg">No reservation requests at the moment.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

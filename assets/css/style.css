@@ -1,0 +1,141 @@
+/* Modern Premium SaaS Dashboard Styling */
+:root {
+  --primary: #4f46e5;      /* Indigo 600 */
+  --primary-hover: #4338ca;/* Indigo 700 */
+  --accent: #0d9488;       /* Teal 600 */
+  --bg-color: #f3f4f6;     /* Gray 100 */
+  --text-color: #1f2937;   /* Gray 800 */
+  --sidebar-w: 250px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Glassmorphism setup */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dark .glass {
+  background: rgba(31, 41, 55, 0.7); /* gray 800 */
+  border: 1px solid rgba(75, 85, 99, 0.3); /* gray 600 */
+  color: #f3f4f6; /* gray 100 */
+}
+
+/* Gradient text */
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(to right, var(--primary), var(--accent));
+}
+
+.dark .text-gradient {
+  background-image: linear-gradient(to right, #818cf8, #2dd4bf);
+}
+
+/* Gradient backgrounds for buttons */
+.btn-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: var(--sidebar-w);
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 40;
+  transition: transform 0.3s ease-in-out;
+}
+
+.main-content {
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* Smooth hover animations */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark mode overrides */
+.dark body {
+  --bg-color: #111827; /* Gray 900 */
+  --text-color: #f9fafb; /* Gray 50 */
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.dark .card-bg {
+  background-color: #1f2937; /* Gray 800 */
+  border-color: #374151; /* Gray 700 */
+}
+
+/* Chart container styling */
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Data Table tweaks */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.dark th {
+  background-color: #374151; /* gray 700 */
+  color: #e5e7eb; /* gray 200 */
+}
+
+.dark td {
+  border-color: #374151; /* gray 700 */
+}
+
+.dark tr:hover td {
+  background-color: #374151; /* gray 700 */
+}
